@@ -3,6 +3,7 @@ import Login from "./Pages/Login.jsx";
 import AddTrip from "./Pages/AddTrip.jsx";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { UserAuthContextProvider } from "./UserAuthContext.js";
+import ProtectedRoute from "./private-routes.js";
 
 function App() {
   return (
@@ -10,8 +11,24 @@ function App() {
       <UserAuthContextProvider>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/home" element={<Homepage />} />
-          <Route path="/addTrip" element={<AddTrip />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Homepage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addTrip"
+            element={
+              <ProtectedRoute>
+                <AddTrip />
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route path="/home" element={<Homepage />} />
+          <Route path="/addTrip" element={<AddTrip />} /> */}
         </Routes>
       </UserAuthContextProvider>
     </>

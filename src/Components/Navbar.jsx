@@ -79,6 +79,7 @@ const Container = styled.div`
         color: black;
       }
       div {
+        cursor: pointer;
         color: black;
       }
     }

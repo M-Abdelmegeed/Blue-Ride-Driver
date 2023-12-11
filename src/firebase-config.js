@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: process.ENV.FIREBASE_API_KEY,
   authDomain: "campuscruise-c63a4.firebaseapp.com",
   projectId: "campuscruise-c63a4",
   storageBucket: "campuscruise-c63a4.appspot.com",

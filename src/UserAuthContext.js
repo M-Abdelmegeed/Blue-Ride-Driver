@@ -6,13 +6,11 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth } from "./firebase-config";
-import { useDispatch } from "react-redux";
 
 const userAuthContext = createContext();
 
 export function UserAuthContextProvider({ children }) {
   const [user, setUser] = useState({});
-  const dispatch = useDispatch();
 
   function logIn(email, password) {
     return signInWithEmailAndPassword(auth, email, password);
