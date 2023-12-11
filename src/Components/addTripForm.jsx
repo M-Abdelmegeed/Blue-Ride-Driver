@@ -73,6 +73,8 @@ export default function AddTripForm() {
       const docRef = await addDoc(collection(db, "Trips"), {
         acceptedRiders: [],
         pendingRiders: [],
+        pendingRidersNames: [],
+        acceptedRidersNames: [],
         driverName: userData.name,
         driverId: userData.uid,
         from: formData["from"],

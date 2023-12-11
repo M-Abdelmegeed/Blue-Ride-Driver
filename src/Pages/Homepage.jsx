@@ -52,6 +52,8 @@ export default function Homepage() {
                 time={trip.time}
                 acceptedRiders={trip.acceptedRiders}
                 pendingRiders={trip.pendingRiders}
+                acceptedRidersNames={trip.acceptedRidersNames}
+                pendingRidersNames={trip.pendingRidersNames}
               />
             ))}
           </div>

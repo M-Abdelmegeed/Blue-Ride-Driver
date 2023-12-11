@@ -11,6 +11,20 @@ import Pending from "@mui/icons-material/HourglassEmpty";
 import { TbArrowBigRightLines } from "react-icons/tb";
 import DriveEtaIcon from "@mui/icons-material/DriveEta";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { useSelector } from "react-redux";
+import { db } from "../firebase-config";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  where,
+  query,
+  arrayRemove,
+  arrayUnion,
+  getDocs,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 
 export default function TripCard({
   from,
@@ -20,14 +34,103 @@ export default function TripCard({
   pendingRiders,
   acceptedRiders,
   stops,
+  acceptedRidersNames,
+  pendingRidersNames,
 }) {
-  // const from = "New York";
-  // const to = "Bahamas";
-  // const date = "April 24, 2023";
-  // const time = "5:30 PM";
-  // const pendingRiders = ["Rider 1", "Rider 2", "Rider 3"];
-  // const acceptedRiders = ["Rider A", "Rider B"];
-  // const stops = ["Stop 1", "Stop 2", "Stop 3"];
+  const userData = useSelector((state) => state);
+
+  const handleAcceptRider = async (index) => {
+    try {
+      const tripsRef = collection(db, "Trips");
+      const queryRef = query(
+        tripsRef,
+        where("from", "==", from),
+        where("to", "==", to),
+        where("driverId", "==", userData.uid),
+        where("date", "==", date)
+      );
+      const historyRef = collection(db, "History");
+      const historyQueryRef = query(
+        historyRef,
+        where("from", "==", from),
+        where("to", "==", to),
+        where("driverId", "==", userData.uid),
+        where("date", "==", date)
+      );
+
+      const historyQuerySnapshot = await getDocs(historyQueryRef);
+      if (!historyQuerySnapshot.empty) {
+        const historyDoc = historyQuerySnapshot.docs[0];
+        const historyData = historyDoc.data();
+        await updateDoc(historyDoc.ref, {
+          status: "Accepted",
+        });
+      }
+      const querySnapshot = await getDocs(queryRef);
+      if (!querySnapshot.empty) {
+        const tripDoc = querySnapshot.docs[0];
+        const tripData = tripDoc.data();
+
+        await updateDoc(tripDoc.ref, {
+          pendingRiders: arrayRemove(tripData.pendingRiders[index]),
+          acceptedRiders: arrayUnion(tripData.pendingRiders[index]),
+          pendingRidersNames: arrayRemove(tripData.pendingRidersNames[index]),
+          acceptedRidersNames: arrayUnion(tripData.pendingRidersNames[index]),
+        });
+
+        console.log("Document updated successfully!");
+      } else {
+        console.log("No matching document found");
+      }
+    } catch (e) {
+      console.error("Error updating document: ", e);
+    }
+  };
+
+  const handleRejectRider = async (index) => {
+    try {
+      const tripsRef = collection(db, "Trips");
+      const queryRef = query(
+        tripsRef,
+        where("from", "==", from),
+        where("to", "==", to),
+        where("driverId", "==", userData.uid),
+        where("date", "==", date)
+      );
+      const historyRef = collection(db, "History");
+      const historyQueryRef = query(
+        historyRef,
+        where("from", "==", from),
+        where("to", "==", to),
+        where("driverId", "==", userData.uid),
+        where("date", "==", date)
+      );
+
+      const historyQuerySnapshot = await getDocs(historyQueryRef);
+      if (!historyQuerySnapshot.empty) {
+        const historyDoc = historyQuerySnapshot.docs[0];
+        await updateDoc(historyDoc.ref, {
+          status: "Rejected",
+        });
+      }
+      const querySnapshot = await getDocs(queryRef);
+      if (!querySnapshot.empty) {
+        const tripDoc = querySnapshot.docs[0];
+        const tripData = tripDoc.data();
+
+        await updateDoc(tripDoc.ref, {
+          pendingRiders: arrayRemove(tripData.pendingRiders[index]),
+          pendingRidersNames: arrayRemove(tripData.pendingRidersNames[index]),
+        });
+
+        console.log("Document updated successfully!");
+      } else {
+        console.log("No matching document found");
+      }
+    } catch (e) {
+      console.error("Error updating document: ", e);
+    }
+  };
 
   return (
     <Card sx={{ width: 320 }}>
@@ -59,7 +162,7 @@ export default function TripCard({
       <CardContent orientation="horizontal">
         <div style={{ width: "100%" }}>
           <Typography level="body-xs">Pending Riders:</Typography>
-          {pendingRiders.map((rider, index) => (
+          {pendingRidersNames.map((rider, index) => (
             <div
               key={index}
               style={{
@@ -94,6 +197,7 @@ export default function TripCard({
                   color="success"
                   size="sm"
                   startIcon={<CheckIcon />}
+                  onClick={() => handleAcceptRider(index)}
                 >
                   Accept
                 </Button>
@@ -103,18 +207,19 @@ export default function TripCard({
                   color="danger"
                   size="sm"
                   startIcon={<CloseIcon />}
+                  onClick={() => handleRejectRider(index)}
                 >
                   Reject
                 </Button>
               </div>
             </div>
           ))}
-          {pendingRiders.length === 0 && (
+          {pendingRidersNames.length === 0 && (
             <Typography>No pending riders</Typography>
           )}
 
           <Typography level="body-xs">Accepted Riders:</Typography>
-          {acceptedRiders.map((rider, index) => (
+          {acceptedRidersNames.map((rider, index) => (
             <div
               key={index}
               style={{
@@ -129,7 +234,7 @@ export default function TripCard({
               </Typography>
             </div>
           ))}
-          {acceptedRiders.length === 0 && (
+          {acceptedRidersNames.length === 0 && (
             <Typography>No accepted riders</Typography>
           )}
 
