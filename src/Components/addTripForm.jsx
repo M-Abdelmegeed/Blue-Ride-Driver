@@ -99,7 +99,7 @@ export default function AddTripForm() {
       tomorrowDate.setDate(currentDate.getDate() + 1);
 
       const shouldDisplayModal =
-        formData.time === "7:30AM" &&
+        formData.time === "7:30 AM" &&
         formData.date === tomorrowDate.toISOString().split("T")[0] &&
         currentDate.getHours() >= 22;
 
