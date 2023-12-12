@@ -15,10 +15,17 @@ import { db } from "../firebase-config";
 import { collection, addDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import Modal from "@mui/joy/Modal";
+import ModalClose from "@mui/joy/ModalClose";
+import ModalDialog from "@mui/joy/ModalDialog";
+import DialogTitle from "@mui/joy/DialogTitle";
+import DialogContent from "@mui/joy/DialogContent";
 
 export default function AddTripForm() {
   const navigate = useNavigate();
   const userData = useSelector((state) => state);
+  const [showMorningModal, setShowMorningModal] = useState(false);
+  const [showAfternoonModal, setShowAfternoonModal] = useState(false);
 
   const destinations = [
     "Heliopolis",
@@ -68,7 +75,51 @@ export default function AddTripForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+
+    if (
+      formData.to === "" ||
+      formData.from === "" ||
+      formData.date === "" ||
+      formData.stops.length === 0 ||
+      formData.price === "" ||
+      formData.time === ""
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const currentDate = new Date();
+    const currentTime = currentDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (formData.time === "7:30AM") {
+      const tomorrowDate = new Date();
+      tomorrowDate.setDate(currentDate.getDate() + 1);
+
+      const shouldDisplayModal =
+        formData.time === "7:30AM" &&
+        formData.date === tomorrowDate.toISOString().split("T")[0] &&
+        currentDate.getHours() >= 22;
+
+      if (shouldDisplayModal) {
+        setShowMorningModal(true);
+        return;
+      }
+    }
+
+    if (formData.time === "5:30 PM") {
+      const shouldDisplayAfternoonModal =
+        formData.date === currentDate.toISOString().split("T")[0] &&
+        currentDate.getHours() >= 13;
+
+      if (shouldDisplayAfternoonModal) {
+        setShowAfternoonModal(true);
+        return;
+      }
+    }
+
     try {
       const docRef = await addDoc(collection(db, "Trips"), {
         acceptedRiders: [],
@@ -84,6 +135,7 @@ export default function AddTripForm() {
         stops: formData["stops"],
         time: formData["time"],
       });
+
       console.log("Document written with ID: ", docRef.id);
       navigate("/home");
     } catch (e) {
@@ -209,6 +261,7 @@ export default function AddTripForm() {
             onChange={handleInputChange("price")}
           />
         </FormControl>
+
         {/* Time Input */}
         <FormControl sx={{ m: 1, width: "65ch" }}>
           <TextField
@@ -221,11 +274,43 @@ export default function AddTripForm() {
             }}
           />
         </FormControl>
-
-        {/* Submit Button */}
         <Button variant="contained" onClick={handleSubmit}>
           Submit
         </Button>
+
+        {/* Morning Modal */}
+        <Modal
+          open={showMorningModal}
+          onClose={() => setShowMorningModal(false)}
+          aria-labelledby="morning-modal-title"
+          aria-describedby="morning-modal-description"
+        >
+          <ModalDialog variant="solid">
+            <ModalClose />
+            <DialogTitle>Oops, too late!</DialogTitle>
+            <DialogContent>
+              You cannot add an morning ride now, it is past 10 PM, but just for
+              the sake of the demo it will be added.
+            </DialogContent>
+          </ModalDialog>
+        </Modal>
+
+        {/* Afternoon Modal */}
+        <Modal
+          open={showAfternoonModal}
+          onClose={() => setShowAfternoonModal(false)}
+          aria-labelledby="afternoon-modal-title"
+          aria-describedby="afternoon-modal-description"
+        >
+          <ModalDialog variant="solid">
+            <ModalClose />
+            <DialogTitle>Oops, too late!</DialogTitle>
+            <DialogContent>
+              You cannot add an afternoon ride now, it is past 1 PM, but just
+              for the sake of the demo it will be added
+            </DialogContent>
+          </ModalDialog>
+        </Modal>
       </div>
     </Box>
   );
