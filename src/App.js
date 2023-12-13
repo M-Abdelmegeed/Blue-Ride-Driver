@@ -4,6 +4,7 @@ import AddTrip from "./Pages/AddTrip.jsx";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { UserAuthContextProvider } from "./UserAuthContext.js";
 import ProtectedRoute from "./private-routes.js";
+import SignUp from "./Pages/SignUp.jsx";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <UserAuthContextProvider>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route
             path="/home"
             element={

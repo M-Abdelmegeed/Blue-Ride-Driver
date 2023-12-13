@@ -10,24 +10,34 @@ import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { blue } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
-import Image from "../Assets/BlueRideASU.png";
-import SchoolIcon from "@mui/icons-material/School";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { useUserAuth } from "../UserAuthContext";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../Redux/loginReducer";
+import Image from "../Assets/BlueRideASU.png";
+import ModalClose from "@mui/joy/ModalClose";
+import ModalDialog from "@mui/joy/ModalDialog";
+import DialogTitle from "@mui/joy/DialogTitle";
+import Modal from "@mui/joy/Modal";
+import { auth } from "../firebase-config";
+import { updateProfile } from "firebase/auth";
 
-const defaultTheme = createTheme();
-
-export default function Login() {
-  const { logIn } = useUserAuth();
+export default function SignUp() {
+  const { signUp } = useUserAuth();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const validateEmail = () => {
-    const emailRegex = /^[a-zA-Z0-9]{7}@eng\.asu\.edu\.eg$/;
+    const emailRegex = /^[a-zA-Z0-9]+@eng\.asu\.edu\.eg$/;
 
     if (emailRegex.test(email)) {
       setError(false);
@@ -36,42 +46,38 @@ export default function Login() {
     }
   };
 
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-    setError(false);
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+
     try {
-      const userCredential = await logIn(
-        data.get("email"),
-        data.get("password")
-      );
+      if (password !== confirmPassword) {
+        setShowModal(true);
+        console.log("Passwords do not match");
+        return;
+      }
+
+      const userCredential = await signUp(email, password);
       const user = userCredential.user;
+      await updateProfile(auth.currentUser, {
+        displayName: `${firstName} ${lastName}`,
+      });
       console.log("Response object uid" + user.uid);
       dispatch(
         setCredentials({
           email: user.email,
-          name: user.displayName,
+          name: `${firstName} ${lastName}`,
           uid: user.uid,
         })
       );
       navigate("/home");
-      console.log("Login Successfull");
+      console.log("Signup Successful");
     } catch (err) {
       console.log("The following error has occurred: " + err);
     }
-    // navigate("/home");
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <>
       <Grid container component="main" sx={{ height: "100vh" }}>
         <CssBaseline />
         <Grid
@@ -86,7 +92,6 @@ export default function Login() {
               t.palette.mode === "light"
                 ? t.palette.grey[50]
                 : t.palette.grey[900],
-            // backgroundSize:"cover",
             backgroundPosition: "center",
           }}
         />
@@ -101,10 +106,10 @@ export default function Login() {
             }}
           >
             <Avatar sx={{ m: 1, bgcolor: blue[500] }}>
-              <SchoolIcon />
+              <PersonAddIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-              Login
+              Sign Up
             </Typography>
             <Box
               component="form"
@@ -122,15 +127,43 @@ export default function Login() {
                 autoComplete="email"
                 autoFocus
                 value={email}
-                onChange={handleEmailChange}
+                onChange={(e) => setEmail(e.target.value)}
                 onBlur={validateEmail}
                 error={error}
                 helperText={error ? "Invalid ASU email" : ""}
-                // InputProps={{
-                //   endAdornment: (
-                //     <InputAdornment position="end">@eng.asu.edu.eg</InputAdornment>
-                //   ),
-                // }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="firstName"
+                label="First Name"
+                name="firstName"
+                autoComplete="given-name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="lastName"
+                label="Last Name"
+                name="lastName"
+                autoComplete="family-name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="phoneNumber"
+                label="Phone Number"
+                name="phoneNumber"
+                autoComplete="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
               />
               <TextField
                 margin="normal"
@@ -140,7 +173,21 @@ export default function Login() {
                 label="Password"
                 type="password"
                 id="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="confirmPassword"
+                label="Confirm Password"
+                type="password"
+                id="confirmPassword"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
               <Button
                 type="submit"
@@ -148,13 +195,23 @@ export default function Login() {
                 variant="contained"
                 sx={{ mt: 3, mb: 2, bgcolor: blue[500] }}
               >
-                Sign In
+                Sign Up
               </Button>
             </Box>
-            <a href="/signup">Don't have an account? Sign Up</a>
           </Box>
         </Grid>
       </Grid>
-    </ThemeProvider>
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        aria-labelledby="afternoon-modal-title"
+        aria-describedby="afternoon-modal-description"
+      >
+        <ModalDialog variant="solid">
+          <ModalClose />
+          <DialogTitle>Sorry, Passwords dont match!</DialogTitle>
+        </ModalDialog>
+      </Modal>
+    </>
   );
 }
