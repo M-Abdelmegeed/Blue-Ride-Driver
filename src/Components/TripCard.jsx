@@ -18,6 +18,7 @@ import ModalDialog from "@mui/joy/ModalDialog";
 import DialogTitle from "@mui/joy/DialogTitle";
 import DialogContent from "@mui/joy/DialogContent";
 import Modal from "@mui/joy/Modal";
+import Box from "@mui/material/Box";
 import {
   collection,
   addDoc,
@@ -65,6 +66,7 @@ export default function TripCard({
 
     if (shouldDisplayModal) {
       setShowModal(true);
+      return;
     }
     try {
       const tripsRef = collection(db, "Trips");
@@ -157,14 +159,39 @@ export default function TripCard({
       console.error("Error updating document: ", e);
     }
   };
+  const currentDate = new Date();
+  const targetDate = new Date(date);
+  const isDateBeforeToday = targetDate < currentDate;
 
   return (
     <>
       <Card sx={{ width: 320 }}>
         <div>
-          <Typography level="title-lg" sx={{ marginBottom: "0.5rem" }}>
-            {date}
-          </Typography>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "0.5rem",
+            }}
+          >
+            <Typography level="title-lg" sx={{ marginBottom: "0.5rem" }}>
+              {date}
+            </Typography>
+            {isDateBeforeToday && (
+              <Box
+                sx={{
+                  backgroundColor: "#e6e3e3",
+                  padding: "5px",
+                  borderRadius: "5px",
+                  color: "white",
+                }}
+              >
+                <Typography variant="body1" sx={{ color: "green" }}>
+                  Completed
+                </Typography>
+              </Box>
+            )}
+          </div>
           <div
             style={{
               display: "flex",
@@ -306,8 +333,7 @@ export default function TripCard({
           <DialogTitle>Oops, too late!</DialogTitle>
           <DialogContent>
             You cannot accept new riders now! You should accept riders before
-            11:30 PM for morning rides and 4:30 PM for afternoon rides. But for
-            the sake of the demo we will accept it for now.
+            11:30 PM for morning rides and 4:30 PM for afternoon rides.
           </DialogContent>
         </ModalDialog>
       </Modal>
