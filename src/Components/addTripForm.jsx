@@ -30,7 +30,8 @@ export default function AddTripForm() {
   const destinations = [
     "Heliopolis",
     "Rehab",
-    "ASU",
+    "Gate 3",
+    "Gate 4",
     "Tayaran",
     "Abbas el Akkad",
     "Makram Ebeid",
@@ -175,14 +176,14 @@ export default function AddTripForm() {
           justifyContent: "center",
         }}
       >
-        {/* "To" Dropdown */}
+        {/* "From" Dropdown */}
         <FormControl sx={{ m: 1, width: "65ch" }}>
-          <InputLabel htmlFor="to-destination">To</InputLabel>
+          <InputLabel htmlFor="from-destination">From</InputLabel>
           <Select
-            id="to-destination"
-            label="To"
-            value={formData.to}
-            onChange={handleInputChange("to")}
+            id="from-destination"
+            label="From"
+            value={formData.from}
+            onChange={handleInputChange("from")}
           >
             {destinations.map((destination) => (
               <MenuItem key={destination} value={destination}>
@@ -192,14 +193,14 @@ export default function AddTripForm() {
           </Select>
         </FormControl>
 
-        {/* "From" Dropdown */}
+        {/* "To" Dropdown */}
         <FormControl sx={{ m: 1, width: "65ch" }}>
-          <InputLabel htmlFor="from-destination">From</InputLabel>
+          <InputLabel htmlFor="to-destination">To</InputLabel>
           <Select
-            id="from-destination"
-            label="From"
-            value={formData.from}
-            onChange={handleInputChange("from")}
+            id="to-destination"
+            label="To"
+            value={formData.to}
+            onChange={handleInputChange("to")}
           >
             {destinations.map((destination) => (
               <MenuItem key={destination} value={destination}>
@@ -289,8 +290,7 @@ export default function AddTripForm() {
             <ModalClose />
             <DialogTitle>Oops, too late!</DialogTitle>
             <DialogContent>
-              You cannot add an morning ride now, it is past 10 PM, but just for
-              the sake of the demo it will be added.
+              You cannot add an morning ride now, it is past 10 PM.
             </DialogContent>
           </ModalDialog>
         </Modal>
