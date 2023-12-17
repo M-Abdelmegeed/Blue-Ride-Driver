@@ -28,6 +28,7 @@ export default function AddTripForm() {
   const [showAfternoonModal, setShowAfternoonModal] = useState(false);
 
   const destinations = [
+    "ASU",
     "Heliopolis",
     "Rehab",
     "Gate 3",
