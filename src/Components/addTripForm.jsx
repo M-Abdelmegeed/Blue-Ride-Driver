@@ -154,9 +154,17 @@ export default function AddTripForm() {
   };
 
   useEffect(() => {
-    if (formData.from === "ASU") {
+    if (
+      formData.from === "ASU" ||
+      formData.from === "Gate 3" ||
+      formData.from === "Gate 4"
+    ) {
       setFormData((prevData) => ({ ...prevData, time: "5:30 PM" }));
-    } else if (formData.to === "ASU") {
+    } else if (
+      formData.to === "ASU" ||
+      formData.to === "Gate 3" ||
+      formData.to === "Gate 4"
+    ) {
       setFormData((prevData) => ({ ...prevData, time: "7:30 AM" }));
     }
   }, [formData.from, formData.to]);
